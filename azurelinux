@@ -1,0 +1,9 @@
+
+
+az group create --name aksAzureLinux --location $location
+
+az aks create --name testAzureLinuxCluster --resource-group AzureLinuxTest --os-sku AzureLinux --generate-ssh-keys
+
+az aks get-credentials --resource-group AzureLinuxTest --name testAzureLinuxCluster
+
+kubectl get pods --all-namespaces
