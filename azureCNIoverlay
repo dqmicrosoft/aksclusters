@@ -1,0 +1,6 @@
+clusterName="aksOverlayCluster"
+resourceGroup="overlayRG"
+location="westeurope"
+pod_cidr="192.168.0.0/16"
+
+az aks create -n $clusterName -g $resourceGroup --location $location --network-plugin azure --network-plugin-mode overlay --pod-cidr $pod_cidr
