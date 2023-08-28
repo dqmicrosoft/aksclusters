@@ -1,18 +1,21 @@
-resourceGroup="myResourceGroup"
-vnet="myVirtualNetwork"
-location="westcentralus"
-clusterName="myAKSCluster"
-subscription="aaaaaaa-aaaaa-aaaaaa-aaaa"
+resourceGroup="podSubnetRG"
+vnet="podSubnetVnet"
+location="westeurope"
+clusterName="podSubnetCluster"
+subscription=$(az account show --query id --output tsv)
+vnet_cidr="10.0.0.0/8"
+nodeSubnet_cidr="10.240.0.0/16"
+podSubnet_cidr="10.241.0.0/16"
+node2Subnet_cidr="10.242.0.0/16"
+pod2Subnet_cidr="10.243.0.0/16"
 
 # Create the resource group
 az group create --name $resourceGroup --location $location
 
 # Create our two subnet network 
-az network vnet create -g $resourceGroup --location $location --name $vnet --address-prefixes 10.0.0.0/8 -o none 
-az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name nodesubnet --address-prefixes 10.240.0.0/16 -o none 
-az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name podsubnet --address-prefixes 10.241.0.0/16 -o none
-
-
+az network vnet create -g $resourceGroup --location $location --name $vnet --address-prefixes $vnet_cidr -o none 
+az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name nodesubnet --address-prefixes $nodeSubnet_cidr -o none 
+az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name podsubnet --address-prefixes $podSubnet_cidr -o none
 
 az aks create -n $clusterName -g $resourceGroup -l $location \
     --max-pods 250 \
@@ -21,8 +24,8 @@ az aks create -n $clusterName -g $resourceGroup -l $location \
     --vnet-subnet-id /subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$vnet/subnets/nodesubnet \
     --pod-subnet-id /subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Network/virtualNetworks/$vnet/subnets/podsubnet  
 
-az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name node2subnet --address-prefixes 10.242.0.0/16 -o none 
-az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name pod2subnet --address-prefixes 10.243.0.0/16 -o none 
+az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name node2subnet --address-prefixes $node2Subnet_cidr -o none 
+az network vnet subnet create -g $resourceGroup --vnet-name $vnet --name pod2subnet --address-prefixes $pod2Subnet_cidr -o none 
 
 az aks nodepool add --cluster-name $clusterName -g $resourceGroup  -n newnodepool \
     --max-pods 250 \
